@@ -10,7 +10,6 @@
     <div class="center">Описание проекта</div>
     <div class="structure ">
     <span class="t2">Файловая структура</span>
-  
       <ul>
         <li>
           client
