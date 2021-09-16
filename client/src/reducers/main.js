@@ -1,11 +1,11 @@
 const initialState = {
     project_1: {
-        wall_height: 1,
+        wall_height: 1, // константа высоты потолка и стен
         furniture_floor: [
             {
                 id: "1",
                 name: "Стул красный",
-                type: "Chear",//  тип товара стул стол 
+                type: "Chair",//  тип товара стул стол 
                 url: "./models/chair_03_red.glb",
                 dots: { x: "-3", z: "-2" },
                 rotate: 0, // градусы 
@@ -101,7 +101,7 @@ const initialState = {
                 dots: { x: "0", z: "0", x2: "0", z2: "1" },
                 width: "0.1",
                 textures: [{
-                    type: " Сторона 1 ",
+                    type: " Сторона 1 ", // возможно не понадобится, сейчас нужно для разработки
                     name: "обои ",
                     id: "1",
                     width: "1",
@@ -199,20 +199,19 @@ const initialState = {
             },
         ],
     },
-
-
+    // состояние кликнутого объекта  и все изменения с ним передаются сюда
     activeObject: {
         wall: {},  // - выбранная стена
         surface: {}, // поверхность
         newFurnishings: {}, // для добавления картин
         action: '', //  выбрано действие для поворота или мувинга модели
-        changeVisible: {
+        changeVisible: { // при изменении видимости, переписать на что-то упрощенное 
             obj: {},
             action: ''
         },
         isSave: false,  // для модалки - сохранять изменение
         newTexture: {},
-        newModel: {},
+        newModel: {}, // новая модель в модалке
         typeOfChange: '', // замена, удаление или добавление?
         selectedModel: {}, //выбранная модель
         lockModel: {}, // когда заблокировали модель, которая была активна
@@ -220,7 +219,7 @@ const initialState = {
         deleting: {} // удаляемая модель
     },
 
-    // выбранные из списков а не по клику
+    // выбранные предметы из списка слева, а не по клику в сцене 
     activeInList: {
         wall: {},
         surface: {},
@@ -232,17 +231,17 @@ const initialState = {
         lockModel: {},
     },
 
-    // модели для замены
+    // модели для замены, рандомный список
     modelList: [{
         id: "20",
         name: "Стул серый",
-        type: "chear",
+        type: "Chair",
         url: "./models/chair_02.glb",
     },
     {
         id: "21",
         name: "Стол черный",
-        type: "chear",
+        type: "Chair",
         url: "./models/table_03.glb",
     },
     {
@@ -262,25 +261,25 @@ const initialState = {
     textureList: [
 
         {
-            name: "паркет", // кирпич
+            name: "паркет",
             id: "5",
-            width: "1", //длина кирпича
+            width: "1",
             url: "паркет.jpg",
         },
         {
-            name: "обои зеленые", // кирпич
+            name: "обои зеленые",
             id: "6",
-            width: "1", //длина кирпича
+            width: "1",
             url: "обои.jpg",
         },
         {
-            name: "обои белые", // кирпич
+            name: "обои белые",
             id: "7",
-            width: "1", //длина кирпича
+            width: "1",
             url: "обои2.jpg",
         },
     ],
-    // картины
+    // картины для добавления 
     furnishingsWallList: [
         {
             id: "1",
@@ -299,20 +298,20 @@ const initialState = {
         },
 
     ],
-    // управление рукой 
+    // управление режиомом камеры - panorama это рука, default - стрелка 
     camera: {
         status: "default",
     },
     modal: {
         isOpen: false,
-        typeOfChange: '',
+        typeOfChange: '', // для отображения тех или иных новых предметов - картин, текстур и тд
     },
-    modalForConfirm: {
+    modalForConfirm: { // при удалении 
         isOpen: false,
         confirmed: false
     },
 };
-// переделать - дублируется action и сам объект 
+
 const changeVisibilityModel = (state, payload) => {
     const { project_1, activeObject } = state;
     const index = findIndex(project_1.furniture_floor, payload.id);
@@ -328,6 +327,7 @@ const changeVisibilityModel = (state, payload) => {
     };
 };
 
+// обновляет стейт после подтвержения замены, переименовать 
 const replaceModel = (state, payload) => {
     const { project_1 } = state;
     const { prev, next } = payload;
@@ -351,7 +351,7 @@ const replaceModel = (state, payload) => {
         },
     };
 }
-// на что меняем
+// на что меняем модель 
 const selectReplaceBy = (state, payload) => {
     const { activeObject } = state;
     let newModel = payload;
@@ -361,22 +361,9 @@ const selectReplaceBy = (state, payload) => {
         activeObject: { ...activeObject, newModel: newModel }
     }
 };
-const selectModel = (state, payload, from) => {
+const selectModel = (state, payload) => {
     const { activeObject, activeInList } = state;
-    let { id, name, type, url, dots, rotate, moveOnly, visible, locked } = payload;
-
-    let updateModel = {
-        id: id,
-        name: name,
-        type: type,
-        url: url,
-        dots: dots,
-        rotate: rotate,
-        moveOnly: moveOnly,
-        visible: visible,
-        locked: locked
-    }
-
+    let updateModel = { ...payload }
     let activeModel;
 
     // тут сбрасывает на пустой массив когда кликаешь по одному и тому же
@@ -405,46 +392,28 @@ const changePositionModel = (state, payload) => {
     const { project_1, activeObject, } = state;
     const index = findIndex(project_1.furniture_floor, payload.id);
     const model = project_1.furniture_floor[index];
-    let x = payload.dots.x;
-    let y = payload.dots.y;
-    let z = payload.dots.z;
-    if (activeObject.selectedModel?.id && model) {
-        model.dots = { x, y, z };
-        model.rotate = payload.rotate;
-        project_1.furniture_floor[index] = { ...model };
-
-        let selectedModel = activeObject.selectedModel;
-        selectedModel.dots = model.dots;
-        selectedModel.rotate = payload.rotate;
-        let updateActiveObject = {
-            ...activeObject, selectedModel: {
-                ...selectedModel
-            }
-        }
-        return {
-            ...state,
-            project_1: project_1,
-            activeObject: updateActiveObject
-        }
-    } else if (model) {
-        model.dots = { x, y, z };
-        model.rotate = payload.rotate;
-        project_1.furniture_floor[index] = { ...model };
-        return {
-            ...state,
-            project_1: project_1
-        };
-    } else {
-        console.log("exseption changePositionModel ");
-        return {
-            ...state
+    const { x, y, z } = payload.dots;
+    model.dots = { x, y, z };
+    model.rotate = payload.rotate;
+    project_1.furniture_floor[index] = { ...model };
+    let selectedModel = activeObject.selectedModel;
+    selectedModel.dots = model.dots;
+    selectedModel.rotate = payload.rotate;
+    let updateActiveObject = {
+        ...activeObject, selectedModel: {
+            ...selectedModel
         }
     }
+    return {
+        ...state,
+        project_1: project_1,
+        activeObject: updateActiveObject
+    }
+
 };
 
 const selectTypeOfChange = (state, payload, el) => {
     const { modal, activeObject, modalForConfirm } = state;
-
     if (payload === 'delete_model') {
         return {
             ...state,
@@ -455,14 +424,6 @@ const selectTypeOfChange = (state, payload, el) => {
                 isOpen: true
             }
         };
-    } else if (payload === 'drag' || payload === 'rotate') {
-        let status = modal.typeOfChange === payload ? 'reset' : payload;
-        return {
-            ...state,
-            modal: { ...modal, typeOfChange: status, isOpen: true },
-            activeObject: { ...activeObject, action: status }
-        };
-
     } else {
         let status = modal.typeOfChange === payload ? 'reset' : payload;
         return {
@@ -503,12 +464,9 @@ const resetSelectedModel = (state) => {
 };
 const changeStatusCamera = (state, status) => {
     const { camera } = state;
-    // console.log(status, 'status');
-
     return {
         ...state,
         camera: { ...camera, status: status },
-        // activeObject: { ...activeObject, action: 'reset' }
     };
 };
 const selectTexture = (state, id) => {
@@ -554,14 +512,12 @@ const selectSurface = (state, id) => {
     const surf = project_1.floor[index];
 
     if (activeObject.surface?.id === surf.id) {
-        // console.log('activeObject surface disp');
         return {
             ...state,
             activeObject: { ...activeObject, surface: {}, selectedModel: {}, wall: {} },
             activeInList: { ...activeInList, surface: {}, selectedModel: {}, wall: {} }
         };
     } else {
-        console.log('new surface in store');
         return {
             ...state,
             activeObject: { ...activeObject, surface: surf, selectedModel: {}, wall: {} },
@@ -603,8 +559,6 @@ const getWall = (obj, state, index) => {
 //     return newArr
 // }
 
-// разбить на под диспатчи чтобы записывать результат отдельно
-
 
 const addModel = (state, payload) => {
     const { modal, activeObject, project_1 } = state;
@@ -628,15 +582,13 @@ const saveChanges = (state) => {
     const { modal, activeObject, project_1 } = state;
     let updateObject;
     const furniture_floor = project_1.furniture_floor;
-    // меняем текстуру в редаксе 
     if (activeObject.typeOfChange === 'change_texture') {
-
         if (activeObject.surface.id) {
             updateObject = getSurface(activeObject, state)
             return {
                 ...state,
                 project_1: {
-                    ...project_1, floor: updateObject
+                    ...project_1, floor: [{ ...updateObject }]
                 },
                 activeObject: {
                     ...activeObject,
@@ -674,9 +626,6 @@ const saveChanges = (state) => {
     } else if (activeObject.typeOfChange === 'add_model') {
         return {
             ...state,
-            // project_1: {
-            //     ...project_1, furniture_floor: [...project_1.furniture_floor, activeObject.newModel],
-            // },
             activeObject: {
                 ...activeObject,
                 isSave: true
@@ -724,10 +673,8 @@ const saveChanges = (state) => {
 }
 // что делать с моделью - крутить - перемещать?
 const selectActionModel = (state, payload) => {
-    console.log('selectactionmodel', payload)
     const { activeObject } = state;
     let action = payload === activeObject.action ? 'reset' : payload
-
     return {
         ...state, activeObject: { ...activeObject, action: action }
     }
@@ -794,14 +741,10 @@ const lockModel = (state, payload) => {
             activeObject: { ...activeObject, locking: newModel }
         };
     }
-
-
 }
 
 const resetLockModel = (state) => {
     const { activeObject } = state;
-
-
     return {
         ...state,
         activeObject: { ...activeObject, lockModel: {}, locking: {} },
@@ -820,20 +763,15 @@ const selectedInModelList = (state, payload) => {
     }
 
     let activeObj;
-    console.log(typeModel, 'typeModel')
-
+    // определяем тип активного эл-та
     if (typeModel === 'furniture_floor') {
         activeObj = id !== activeInList.selectedModel?.id ? updateObj : {};
 
-        console.log(activeObj, id, activeInList.selectedModel?.id, 'id')
-    } else if (updateObj.type === 'WALL') {
+    } else if (updateObj.type === 'wall') {
         activeObj = id !== activeInList.wall?.id ? updateObj : {};
-    } if (updateObj.type === 'FLOOR_SHAPE') {
+    } if (updateObj.type === 'floor') {
         activeObj = id !== activeInList.surface?.id ? updateObj : {};
     }
-
-
-
 
     if (activeObj?.id) {
 
@@ -864,7 +802,7 @@ const selectedInModelList = (state, payload) => {
     }
 }
 
-
+// добавим картины 
 const addFurnishings = (state, payload) => {
     const { activeObject } = state;
     return {
@@ -872,12 +810,7 @@ const addFurnishings = (state, payload) => {
         activeObject: { ...activeObject, newFurnishings: payload },
     };
 }
-// const getPercent = (state, payload) => {
-//     return {
-//         ...state,
-//         percentLoading: payload
-//     };
-// }
+
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case "CHANGE_POSITION_MODEL":
@@ -886,7 +819,7 @@ const reducer = (state = initialState, action) => {
             return selectModel(state, action.payload, action.from);
         case "SELECT_REPLACED_BY":
             return selectReplaceBy(state, action.payload);
-        case "SELECT_TYPE_OF_CHANGE":
+        case "SELECT_TYPE_OF_CHANGE":// замена, удаление, добавление модели - выбор действия 
             return selectTypeOfChange(state, action.payload, action.el);
         case "REPLACE_MODEL":
             return replaceModel(state, action.payload);

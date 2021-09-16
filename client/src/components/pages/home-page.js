@@ -24,7 +24,6 @@ const socket = io('http://localhost:7000')
 
 
 const HomePage = ({ 
-  dispatchSelectTypeOfChange,
   changeStatusCamera,
   activeObject,
   camera, 
@@ -109,14 +108,6 @@ const HomePage = ({
             >
               <img src={rotate2} alt="Logo" />
             </div>{" "}
-           
-            {/* <div
-              className="controls-btn"
-              onClick={() => dispatchSelectTypeOfChange("add_model")}
-            >
-              <img src={addImg} alt="Logo" />
-            </div> */}
-
            
 
           </div>
