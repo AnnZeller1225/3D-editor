@@ -22,7 +22,6 @@
         <li>Three.js</li>
         <li>Socket.io</li>
       </ol>
-    
       <p>Реализованный функционал:</p>
       <ol>
         <li>Добавление объектов на сцену</li>
@@ -33,8 +32,7 @@
         <li>Скрытие объектов</li>
         <li>Блокировка перемещения</li>
       </ol>
-    
-    <div class="structure ">
+    <div class="structure">
     <span class="t2">Файловая структура</span>
       <ul>
         <li>
